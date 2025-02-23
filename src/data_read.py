@@ -31,6 +31,10 @@ def get_data():
         df["bombPlantedPerMap"] = (df["bomb_planted"]/df["matches"]).round(2)
         df["bombDefusedPerMap"] = (df["bomb_defused"]/df["matches"]).round(2)
 
+        df.fillna(0, inplace = True)
+
+        print(df)
+
         return df
     except Exception as e:
         print(f"Error loading data: {str(e)}")
