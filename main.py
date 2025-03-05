@@ -208,10 +208,15 @@ if st.session_state.data is not None:
 # Add custom CSS
 st.markdown("""
     <style>
-    .main {
-        background-color: #000000;
-        color: white;
+    .stApp {
+        background-color: white;
+        color: black;
     }
+    </style>
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
     </style>
     """, unsafe_allow_html=True)
 
