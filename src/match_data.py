@@ -49,6 +49,13 @@ def get_match():
         df['total_kills_match'] = df.groupby('game_id')['nb_kill'].transform('sum')
         df['kills_share'] = (df['nb_kill'] / df['total_kills_match'] * 100).round(2)
 
+        # Calculate share of kills for each player in their match
+        df['total_hits_match'] = df.groupby('game_id')['hits'].transform('sum')
+        df['hits_share'] = (df['hits'] / df['total_hits_match'] * 100).round(2)
+
+        #Calculate damage per hit
+        df['damage_hits'] = (df['damage'] / df['hits']).round(2)
+
 
         return df
     except Exception as e:

@@ -85,6 +85,140 @@ if st.session_state.data is not None:
     st.write(summary_df)
 #### NEW PART
 # Add a divider between sections
+
+    st.markdown("---")
+    
+    st.title("Player Match History")
+
+    # Load match data if not already loaded
+    if 'match_df' not in st.session_state:
+        from src.match_data import get_match
+        st.session_state.match_df = get_match()
+
+    match_df = st.session_state.match_df
+
+    if match_df is not None:
+        # Define metrics for match analysis (same as before)
+        match_metrics = {
+            'Kills': 'nb_kill',
+            'Assist': 'assist',
+            'Deaths': 'death',
+            'Damage': 'damage',
+            'ADR': 'adr',
+            'KDR': 'kdr',
+            'Headshot Rate': 'phs',
+            'First Kill': 'firstkill',
+            'KAST': 'pkast',
+            'Hits': 'hits',
+            'Level': 'level',
+            'Rating': 'rating',
+            'Flash Assist': 'flash_assist',
+            'Multi Kills': 'multikills',
+            'Damage Share %': 'damage_share',
+            'Kills Share %': 'kills_share',
+            'Hits Share %': 'hits_share',
+            'Damage Per Hit %': 'damage_hits'
+
+
+        }
+
+        # First, select player
+        all_players = sorted(match_df['nick'].unique())
+        selected_player = st.selectbox(
+            "Select player to analyze",
+            options=all_players,
+            key="player_history_select"
+        )
+
+        # Filter matches for selected player
+        player_matches = match_df[match_df['nick'] == selected_player]
+        
+        # Then, select matches for that player
+        player_game_ids = sorted(player_matches['game_id'].unique())
+        selected_games = st.multiselect(
+            "Select matches to analyze",
+            options=player_game_ids,
+            default=player_game_ids[-5:] if len(player_game_ids) > 5 else player_game_ids,  # Default to last 5 matches
+            key="player_games_select"
+        )
+
+        # Select metric for visualization
+        selected_metric_name = st.selectbox(
+            "Select metric to analyze",
+            list(match_metrics.keys()),
+            key="player_history_metric"
+        )
+        selected_metric = match_metrics[selected_metric_name]
+
+        # Filter final dataset
+        final_df = match_df[
+            (match_df['game_id'].isin(selected_games)) & 
+            (match_df['nick'] == selected_player)
+        ]
+
+        # Create visualization
+        st.subheader(f"{selected_metric_name} by Match")
+        
+        # Create and plot the chart
+        chart_df = final_df[['game_id', selected_metric]].set_index('game_id')
+        st.bar_chart(chart_df)
+
+        # Show detailed statistics
+        st.subheader("Match Details")
+        
+        # Use the same display columns as before
+        display_columns = {
+            'game_id': 'Game ID',
+            'team': 'Team',
+            'updated_at': 'Date',
+            'map_name': 'Map',
+            'nb_kill': 'Kills',
+            'assist': 'Assist',
+            'death': 'Deaths',
+            'hs': 'HS',
+            'damage': 'Damage',
+            'adr': 'ADR',
+            'kdr': 'KDR',
+            'phs': 'HS%',
+            'firstkill': 'First Kill',
+            'pkast': 'KAST',
+            'nb1kill': '1K',
+            'nb2kill': '2K',
+            'nb3kill': '3K',
+            'nb4kill': '4K',
+            'nb5kill': '5K',
+            'defuse': 'Defuse',
+            'bombe': 'Bomb',
+            'hits': 'Hits',
+            'level': 'Level',
+            'flash_assist': 'Flash Assist',
+            'multikills': 'Multi Kills',
+            'damage_share': 'Damage Share %',
+            'kills_share': 'Kills Share %',
+            'hits_share': 'Hits Share %',
+            'damage_hits': 'Damage Hit'
+
+        }
+
+        # Create display dataframe
+        display_df = final_df[display_columns.keys()].copy()
+        display_df.columns = display_columns.values()
+        
+        # Format datetime column
+        display_df['Date'] = display_df['Date'].dt.strftime('%Y-%m-%d %H:%M')
+        
+        # Round floating point numbers
+        float_columns = ['ADR', 'KDR', 'HS%', 'KAST', 'Damage Share %', 'Kills Share %']
+        display_df[float_columns] = display_df[float_columns].round(2)
+
+        # Display the table
+        st.dataframe(
+            display_df.sort_values('Date', ascending=False),
+            hide_index=True,
+            use_container_width=True
+        )
+
+        
     st.markdown("---")
     st.title("Match Analysis Dashboard")
 
@@ -184,7 +318,9 @@ if st.session_state.data is not None:
             'flash_assist': 'Flash Assist',
             'multikills': 'Multi Kills',
             'damage_share': 'Damage Share %',
-            'kills_share': 'Kills Share %'
+            'kills_share': 'Kills Share %',
+            'hits_share': 'Hits Share %',
+            'damage_hits': 'Damage Hit'
         }
 
         # Create a copy of the filtered DataFrame with renamed columns
@@ -204,6 +340,8 @@ if st.session_state.data is not None:
             hide_index=True,
             use_container_width=True
         )
+
+
 
 # Add custom CSS
 st.markdown("""
