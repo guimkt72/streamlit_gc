@@ -217,8 +217,41 @@ if st.session_state.data is not None:
             hide_index=True,
             use_container_width=True
         )
-
+                # Add Statistics Summary section
+        st.subheader("Statistics Summary for Selected Matches")
         
+        # Create summary statistics dataframe
+        stats_to_analyze = {
+            'nb_kill': 'Kills',
+            'death': 'Deaths',
+            'assist': 'Assists',
+            'damage': 'Damage',
+            'adr': 'ADR',
+            'kdr': 'KDR',
+            'phs': 'HS%',
+            'pkast': 'KAST',
+            'firstkill': 'First Kills',
+            'multikills': 'Multi Kills',
+            'damage_share': 'Damage Share %',
+            'kills_share': 'Kills Share %',
+            'damage_hits': 'Damage per Hit'
+        }
+        
+        # Calculate statistics
+        summary_stats = {}
+        for stat_key, stat_name in stats_to_analyze.items():
+            summary_stats[stat_name] = {
+                'Average': final_df[stat_key].mean(),
+                'Minimum': final_df[stat_key].min(),
+                'Maximum': final_df[stat_key].max()
+            }
+        
+        # Convert to DataFrame and round numbers
+        summary_df = pd.DataFrame(summary_stats).T.round(2)
+        
+        # Display the table
+        st.write(summary_df)
+
     st.markdown("---")
     st.title("Match Analysis Dashboard")
 
